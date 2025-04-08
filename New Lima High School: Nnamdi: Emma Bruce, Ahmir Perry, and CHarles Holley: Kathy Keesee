@@ -1,0 +1,70 @@
+#include <SoftwareSerial.h>
+#include <DFRobotDFPlayerMini.h>
+
+// Pin Definitions
+const int motorPin1 = 9;  // Motor control pin 1
+const int motorPin2 = 8;  // Motor control pin 2
+const int ledPin1 = 6;    // LED 1 pin
+const int ledPin2 = 7;    // LED 2 pin
+const int switchPin = 5;  // On/Off switch pin
+
+// DFPlayer Mini setup
+SoftwareSerial mp3Serial(10, 11);  // RX, TX for MP3 player
+DFRobotDFPlayerMini mp3;
+
+// Variables to track switch state
+bool isSwitchOn = false;  // To track whether the switch is ON or OFF
+
+// Flashing light variables
+unsigned long previousMillis = 0;  // Store last time LEDs changed
+const long interval = 500;  // Interval for flashing (milliseconds)
+
+void setup() {
+  // Set up motor pins
+  pinMode(motorPin1, OUTPUT);
+  pinMode(motorPin2, OUTPUT);
+  
+  // Set up LED pins
+  pinMode(ledPin1, OUTPUT);
+  pinMode(ledPin2, OUTPUT);
+  
+  // Set up the switch pin as an input with internal pull-up resistor
+  pinMode(switchPin, INPUT_PULLUP);
+
+  // Initialize Serial communication
+  Serial.begin(9600);
+  mp3Serial.begin(9600);
+  
+  // Initialize MP3 Player
+  if (!mp3.begin(mp3Serial)) {
+    Serial.println("MP3 Player not detected.");
+    while(true);  // Halt the program if the MP3 player is not found
+  }
+}
+
+void loop() {
+  // Read the state of the switch
+  isSwitchOn = digitalRead(switchPin) == LOW;  // Switch ON when pressed (LOW)
+
+  // If the switch is ON, perform the actions
+  if (isSwitchOn) {
+    // Spin the motor
+    digitalWrite(motorPin1, HIGH);
+
+    // Flashing LED logic
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval) {
+      // Save the last time LEDs changed
+      previousMillis = currentMillis;
+
+      // Toggle LEDs between HIGH and LOW
+      digitalWrite(ledPin1, !digitalRead(ledPin1));
+      digitalWrite(ledPin2, !digitalRead(ledPin2));
+    }
+  } else {
+    // When the switch is OFF, turn off the motor and LEDs
+    digitalWrite(motorPin1, LOW);
+    digitalWrite(ledPin1, LOW);
+    digitalWrite(ledPin2, LOW);
+  }
+}
