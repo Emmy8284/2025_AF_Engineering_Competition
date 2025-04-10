@@ -1,0 +1,66 @@
+#include <SoftwareSerial.h>
+#include <DFRobotDFPlayerMini.h>
+#include <Servo.h>
+
+// Pins for the LEDs
+const int ledPin1 = 2;
+const int ledPin2 = 3;
+
+// Pin for the Servo
+const int servoPin = 9;
+
+// Create a software serial port for communication with DFPlayer Mini
+SoftwareSerial mySoftwareSerial(10, 11); // RX, TX pins
+DFRobotDFPlayerMini myDFPlayer;
+
+// Create Servo object
+Servo myServo;
+
+void setup() {
+  // Start serial communication
+  Serial.begin(9600);
+
+  // Set LED pins as output
+  pinMode(ledPin1, OUTPUT);
+  pinMode(ledPin2, OUTPUT);
+
+  // Turn on the LEDs
+  digitalWrite(ledPin1, HIGH);
+  digitalWrite(ledPin2, HIGH);
+
+  // Start the software serial communication for DFPlayer Mini
+  mySoftwareSerial.begin(9600);
+
+  // Initialize DFPlayer Mini
+  if (!myDFPlayer.begin(mySoftwareSerial)) {  // Use software serial to communicate with DFPlayer
+    Serial.println("DFPlayer Mini not detected.");
+    while (true);  // Loop here if DFPlayer Mini is not connected
+  }
+  Serial.println("DFPlayer Mini online.");
+  
+  // Set volume level (range: 0-30)
+  myDFPlayer.volume(20);  // Set volume to a reasonable level (adjust as needed)
+
+  // Start playing the first MP3 file
+  myDFPlayer.play(1); // Play the first MP3 file (on the SD card)
+  
+  // Attach the Servo to pin 9
+  myServo.attach(servoPin);
+
+  // Rotate the Servo to 90 degrees (middle position)
+  myServo.write(90);
+  delay(1000);  // Wait for a second
+  
+  // Rotate the Servo to 0 degrees
+  myServo.write(0);
+  delay(1000);  // Wait for a second
+
+  // Rotate the Servo to 180 degrees
+  myServo.write(180);
+  delay(1000);  // Wait for a second
+}
+
+void loop() {
+  // You can add other code to do things in the loop, but the MP3 is already playing
+  // The LEDs stay on, and the servo rotates as configured in the setup.
+}
